@@ -10,16 +10,28 @@ class GetDateFormat
     private $format;
 
     const CACHE_KEY = "country_date_format";
+    const DEFAULT_COUNTRY = 'en'; // Valeur par défaut
 
     public function __construct()
     {
-        //if (!cache(self::CACHE_KEY)){
-            $this->format = Country::fromCode(Setting::first()->country)->getFormat();
-            cache()->set("country_date_format", $this->format);
-        //}
-
-        //$this->format = cache(self::CACHE_KEY);
-        
+        try {
+            $setting = Setting::first();
+            if (!$setting) {
+                // Si aucun paramètre n'existe, on crée les paramètres par défaut
+                \Artisan::call('db:seed', [
+                    '--class' => 'SettingsTableSeeder'
+                ]);
+                $setting = Setting::first();
+            }
+            
+            $countryCode = $setting ? $setting->country : self::DEFAULT_COUNTRY;
+            $this->format = Country::fromCode($countryCode)->getFormat();
+            cache()->set(self::CACHE_KEY, $this->format);
+        } catch (\Exception $e) {
+            // En cas d'erreur, utiliser le format par défaut
+            $this->format = Country::fromCode(self::DEFAULT_COUNTRY)->getFormat();
+            cache()->set(self::CACHE_KEY, $this->format);
+        }
     }
 
     public function getAllDateFormats()

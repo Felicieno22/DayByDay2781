@@ -17,7 +17,11 @@
                                 {{ auth()->user()->name }}
                             </div>
                             <div class="topbar-user__card__info">
-                                {{ auth()->user()->department->first()->name }}
+                                @if(auth()->user()->department && auth()->user()->department->first())
+                                    {{ auth()->user()->department->first()->name }}
+                                @else
+                                    @lang('No Department')
+                                @endif
                             </div>
                         </div>
                     </div>

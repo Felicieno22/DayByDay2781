@@ -49,4 +49,23 @@ class PaymentRequest extends FormRequest
             'source.in' => __('Invalid source'),
         ];
     }
+
+    /**
+     * Configure the validator instance.
+     *
+     * @param  \Illuminate\Validation\Validator  $validator
+     * @return void
+     */
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $invoice = $this->route('invoice');
+            if ($invoice) {
+                $remainingAmount = $invoice->total - $invoice->payments->sum('amount');
+                if ($this->amount > $remainingAmount) {
+                    $validator->errors()->add('amount', __('Warning: The payment amount is greater than the remaining amount to be paid.'));
+                }
+            }
+        });
+    }
 }
