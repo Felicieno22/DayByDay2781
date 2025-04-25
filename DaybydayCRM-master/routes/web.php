@@ -97,8 +97,6 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('leads', 'LeadsController');
     Route::post('/comments/{type}/{external_id}', 'CommentController@store')->name('comments.create');
 
-
-
     /**
      * Products
      */
@@ -227,6 +225,17 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/', 'AbsenceController@store')->name('absence.store');
         Route::delete('/{absence}', 'AbsenceController@destroy')->name('absence.destroy');
     });
+
+    /**
+     * CSV Import
+     */
+    Route::group(['prefix' => 'csv', 'middleware' => ['auth']], function () {
+        Route::get('/', 'CsvImportController@showImportForm');
+        Route::post('/analyze', 'CsvImportController@analyzeFile');
+        Route::post('/', 'CsvImportController@import')->name('csv.import');
+        Route::post('/reset', 'ResetDataController@resetDatabase')->name('csv.reset');
+    });
+
 });
 
 Route::group(['middleware' => ['auth']], function () {
