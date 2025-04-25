@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Offres - DayJava</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem;
+        }
+        .page-title {
+            color: #4e73df;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            padding: 2rem 0;
+            text-align: center;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+        .back-button {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background-color: #4e73df;
+            color: white;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            background-color: #2e59d9;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 2rem;
+            border: none;
+        }
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            border-radius: 15px 15px 0 0;
+        }
+        .card-header h5 {
+            margin: 0;
+            color: #4e73df;
+            font-weight: 600;
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table th {
+            border-top: none;
+            color: #858796;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .table td {
+            vertical-align: middle;
+        }
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+        .badge-accepted { background-color: #1cc88a; color: white; }
+        .badge-pending { background-color: #f6c23e; color: white; }
+        .badge-rejected { background-color: #e74a3b; color: white; }
+        .price {
+            font-weight: bold;
+            color: #4e73df;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.location.href='/dashboard'">
+        <i class="fas fa-arrow-left me-2"></i>Retour
+    </button>
+
+    <div class="container">
+        <h1 class="page-title">
+            <i class="fas fa-file-contract me-2"></i>
+            Liste des Offres
+        </h1>
+
+        <!-- Statistiques -->
+        <div class="row mb-4" th:if="${offerStats != null}">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="text-primary">Total Offres</h6>
+                        <h2 th:text="${offerStats.total}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="text-success">Acceptées</h6>
+                        <h2 th:text="${offerStats.accepted}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="text-warning">En Attente</h6>
+                        <h2 th:text="${offerStats.pending}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="text-danger">Refusées</h6>
+                        <h2 th:text="${offerStats.rejected}">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Offres</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Titre</th>
+                                <th>Client</th>
+                                <th>Description</th>
+                                <th>Prix</th>
+                                <th>Date de création</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${offers == null || offers.empty}">
+                                <td colspan="6" class="text-center">
+                                    <p class="text-muted my-5">Aucune offre disponible</p>
+                                </td>
+                            </tr>
+                            <tr th:each="offer : ${offers}" th:if="${offers != null && !offers.empty}">
+                                <td th:text="${offer.title}">Titre de l'offre</td>
+                                <td th:text="${offer.clientId}">ID du client</td>
+                                <td th:text="${offer.description}">Description de l'offre</td>
+                                <td class="price" th:text="${#numbers.formatDecimal(offer.price, 0, 'COMMA', 2, 'POINT') + ' €'}">0.00 €</td>
+                                <td th:text="${#dates.format(offer.createdDate, 'dd/MM/yyyy')}">01/01/2024</td>
+                                <td>
+                                    <span class="badge" th:classappend="${
+                                        offer.status == 'ACCEPTED' ? 'badge-accepted' :
+                                        offer.status == 'PENDING' ? 'badge-pending' :
+                                        'badge-rejected'
+                                    }" th:text="${offer.status}">
+                                        PENDING
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

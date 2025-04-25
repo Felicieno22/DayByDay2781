@@ -18,3 +18,5 @@ Route::group(['namespace' => 'App\Api\v1\Controllers'], function () {
         Route::get('users', ['uses' => 'UserController@index']);
     });
 });
+
+Route::post('/reset-data', 'Api\ResetDataController@reset')->name('api.reset-data');

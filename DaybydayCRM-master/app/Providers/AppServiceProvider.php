@@ -17,6 +17,7 @@ use App\Repositories\Format\GetDateFormat;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Dusk\DuskServiceProvider;
 use Laravel\Cashier\Cashier;
+use App\Services\DeleteData\DeleteDataService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,5 +47,12 @@ class AppServiceProvider extends ServiceProvider
             $this->app->register(DuskServiceProvider::class);
         }
         $this->app->singleton(GetDateFormat::class);
+        $this->app->singleton(DeleteDataService::class, function ($app) {
+            logger('Binding DeleteDataService'); // Debug statement
+            return new DeleteDataService();
+        });
+        $this->app->bind(\App\Services\DataImport\DataImportService::class, function ($app) {
+            return new \App\Services\DataImport\DataImportService();
+        });
     }
 }

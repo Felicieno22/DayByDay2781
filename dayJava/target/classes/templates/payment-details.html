@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Détails des Paiements - DayJava</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem;
+        }
+
+        .page-title {
+            color: #4e73df;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            padding: 2rem 0;
+            text-align: center;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .back-button {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background-color: #4e73df;
+            color: white;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            background-color: #2e59d9;
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 2rem;
+            border: none;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .card-header h5 {
+            margin: 0;
+            color: #4e73df;
+            font-weight: 600;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            border-top: none;
+            color: #858796;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+
+        .badge-success { background-color: #1cc88a; }
+        .badge-warning { background-color: #f6c23e; }
+        .badge-danger { background-color: #e74a3b; }
+
+        .amount {
+            font-weight: 600;
+            color: #4e73df;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit {
+            background-color: #f6c23e;
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: #e74a3b;
+            color: white;
+        }
+
+        .btn-edit:hover, .btn-delete:hover {
+            color: white;
+            filter: brightness(90%);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.location.href='/'">
+        <i class="fas fa-arrow-left me-2"></i>Retour
+    </button>
+
+    <div class="container">
+        <h1 class="page-title">
+            <i class="fas fa-credit-card me-2"></i>
+            Détails des Paiements
+        </h1>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Liste des Paiements</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Référence</th>
+                                <th>Client</th>
+                                <th>Facture</th>
+                                <th>Montant</th>
+                                <th>Mode de paiement</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="payment : ${payments}">
+                                <td th:text="${payment.reference}">PAY-001</td>
+                                <td th:text="${payment.client.name}">Nom du client</td>
+                                <td th:text="${payment.invoice.number}">INV-001</td>
+                                <td class="amount" th:text="${#numbers.formatDecimal(payment.amount, 0, 'COMMA', 2, 'POINT') + ' €'}">0.00 €</td>
+                                <td th:text="${payment.paymentMethod}">Carte bancaire</td>
+                                <td>
+                                    <span class="badge" th:classappend="${
+                                        payment.status == 'COMPLETED' ? 'badge-success' :
+                                        payment.status == 'PENDING' ? 'badge-warning' :
+                                        'badge-danger'
+                                    }" th:text="${payment.status}">
+                                        COMPLETED
+                                    </span>
+                                </td>
+                                <td th:text="${#temporals.format(payment.date, 'dd/MM/yyyy')}">01/01/2024</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-sm btn-info" th:onclick="'viewPayment(' + ${payment.id} + ')'">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-edit" th:onclick="'editPayment(' + ${payment.id} + ')'">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-delete" th:onclick="'deletePayment(' + ${payment.id} + ')'">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        function viewPayment(id) {
+            window.location.href = `/dashboard/payments/${id}`;
+        }
+
+        function editPayment(id) {
+            // Logique de modification
+            console.log('Modifier le paiement:', id);
+        }
+
+        function deletePayment(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce paiement ?')) {
+                // Logique de suppression
+                console.log('Supprimer le paiement:', id);
+            }
+        }
+    </script>
+</body>
+</html> 

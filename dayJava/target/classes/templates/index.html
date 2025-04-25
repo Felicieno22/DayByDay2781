@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DayJava - Connexion</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #4568dc 0%, #b06ab3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .login-header h1 {
+            color: #4e73df;
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .form-floating {
+            margin-bottom: 1.8rem;
+        }
+
+        .form-control {
+            height: 58px;
+            font-size: 1.1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #4e73df;
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+        }
+
+        .form-floating label {
+            padding: 1rem 1.25rem;
+            font-size: 1.1rem;
+            color: #6c757d;
+        }
+
+        .form-check-input {
+            width: 20px;
+            height: 20px;
+            margin-top: 3px;
+            cursor: pointer;
+        }
+
+        .form-check-label {
+            margin-left: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 0.9rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            background: linear-gradient(135deg, #4568dc 0%, #6e8efb 100%);
+            border: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+        }
+
+        .btn-login:hover {
+            background: linear-gradient(135deg, #3558cc 0%, #5d7fed 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(78, 115, 223, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(78, 115, 223, 0.3);
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .forgot-password a {
+            color: #4e73df;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: #2e59d9;
+            text-decoration: underline;
+        }
+
+        .alert {
+            margin-bottom: 1.8rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            padding: 1rem 1.25rem;
+        }
+
+        .copyright {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-icon {
+            display: inline-block;
+            margin-right: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn-login:hover .btn-icon {
+            transform: translateX(3px);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>DayJava</h1>
+                <p>Connectez-vous à votre espace</p>
+            </div>
+            
+            <!-- Message d'erreur -->
+            <div th:if="${error}" class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${error}">Erreur</span>
+            </div>
+            
+            <form th:action="@{/login}" method="post">
+                <div class="form-floating">
+                    <input type="email" class="form-control" id="email" name="email" 
+                           placeholder="Email" required 
+                           th:value="${email != null ? email : ''}">
+                    <label for="email"><i class="fas fa-envelope me-2"></i>Email</label>
+                </div>
+                
+                <div class="form-floating">
+                    <input type="password" class="form-control" id="password" 
+                           name="password" placeholder="Mot de passe" required>
+                    <label for="password"><i class="fas fa-lock me-2"></i>Mot de passe</label>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" 
+                           id="rememberMe" name="rememberMe">
+                    <label class="form-check-label" for="rememberMe">
+                        Se souvenir de moi
+                    </label>
+                </div>
+                
+                <div class="mb-3 text-muted text-center small">
+                    <em>Essayez avec admin@admin.com / admin123</em>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-login">
+                    <span class="btn-icon"><i class="fas fa-sign-in-alt"></i></span> Se connecter
+                </button>
+            </form>
+            
+            <div class="forgot-password">
+                <a href="#"><i class="fas fa-key me-1"></i>Mot de passe oublié ?</a>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            © 2025 DayJava. Tous droits réservés.
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

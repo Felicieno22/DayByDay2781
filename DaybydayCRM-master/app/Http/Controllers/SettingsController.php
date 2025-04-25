@@ -11,6 +11,7 @@ use App\Services\ClientNumber\ClientNumberService;
 use App\Services\ClientNumber\ClientNumberValidator;
 use App\Services\InvoiceNumber\InvoiceNumberService;
 use App\Services\InvoiceNumber\InvoiceNumberValidator;
+use App\Services\DeleteData\DeleteDataService;
 use Auth;
 use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
@@ -24,13 +25,16 @@ use App\Http\Requests\Setting\UpdateSettingOverallRequest;
 
 class SettingsController extends Controller
 {
+    protected $deleteDataService;
+
     /**
      * SettingsController constructor.
      */
-    public function __construct()
+    public function __construct(DeleteDataService $deleteDataService)
     {
         $this->middleware('user.is.admin', ['only' => ['index']]);
         $this->middleware('is.demo', ['except' => ['index']]);
+        $this->deleteDataService = $deleteDataService;
     }
 
     /**
@@ -192,5 +196,11 @@ class SettingsController extends Controller
     public function dateFormats()
     {
         return app(GetDateFormat::class)->getAllDateFormats();
+    }
+
+    public function deleteData()
+    {
+        logger('Resolving DeleteDataService'); // Debug statement
+        $this->deleteDataService->deleteDataAndResetAutoIncrement();
     }
 }

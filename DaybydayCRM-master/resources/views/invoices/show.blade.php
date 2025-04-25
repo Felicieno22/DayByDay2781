@@ -264,7 +264,29 @@
     <div class="modal fade" id="update-payment-modal" tabindex="-1" role="dialog" aria-hidden="true" style="display:none;">
         <div class="modal-dialog">
             <div class="modal-content" style="padding:2em;">
-                @include('invoices._updatePaymentModal')
+                <div id="paymentWarning" class="alert alert-warning" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i> <span id="warningMessage"></span>
+                </div>
+                <form id="paymentForm">
+                    @csrf
+                    <div class="form-group">
+                        <label for="amount">@lang('Amount')</label>
+                        <input type="number" class="form-control" id="amount" name="amount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment_date">@lang('Payment Date')</label>
+                        <input type="date" class="form-control" id="payment_date" name="payment_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="source">@lang('Source')</label>
+                        <select class="form-control" id="source" name="source" required>
+                            <option value="">@lang('Select Source')</option>
+                            @foreach(\App\Enums\PaymentSource::cases() as $source)
+                                <option value="{{ $source->value }}">{{ $source->label() }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -297,6 +319,43 @@
                     $('#send-mail').show(150);
                 else
                     $('#send-mail').hide(150);
+            });
+
+            $('#paymentForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                $.ajax({
+                    url: "{{ route('invoices.payments.store', $invoice) }}",
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            $('#paymentModal').modal('hide');
+                            toastr.success(response.message);
+                            
+                            // Afficher l'avertissement si nécessaire
+                            if (response.hasWarning) {
+                                $('#paymentWarning').show();
+                                $('#warningMessage').text(response.warningMessage);
+                            } else {
+                                $('#paymentWarning').hide();
+                            }
+                            
+                            // Recharger la page pour mettre à jour les montants
+                            location.reload();
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            let errors = xhr.responseJSON.errors;
+                            Object.keys(errors).forEach(function(key) {
+                                toastr.error(errors[key][0]);
+                            });
+                        } else {
+                            toastr.error('@lang("An error occurred while processing your request.")');
+                        }
+                    }
+                });
             });
 
         });

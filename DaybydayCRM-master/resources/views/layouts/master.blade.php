@@ -170,7 +170,13 @@
                     <a href="{{ route('integrations.index')}}"
                        class="list-group-item childlist"> <i
                                 class="bullet-point"><span></span></i> {{ __('Integrations') }}</a>
+                    <a href="{{ route('resetData.index')}}"
+                        class="list-group-item childlist"><i 
+                                class="bullet-point"><span></span></i>{{ __('Reset Data')}}</a>            
                 </div>
+                <a href="{{ route('dataImport.index')}}"
+                    class="list-group-item childlist"><i
+                                class="bullet-point"><span></span></i>{{ __('Data Import')}}</a>
             @endif
         </div>
     </nav>

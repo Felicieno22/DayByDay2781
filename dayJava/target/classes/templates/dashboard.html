@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord - DayJava</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dashboard-title {
+            color: #4e73df;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            padding: 2rem 0;
+            text-align: center;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .stats-card {
+            border-radius: 15px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            background: white;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .stats-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .stats-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #5a5c69;
+        }
+
+        .stats-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4e73df;
+        }
+
+        .card-projects { color: #4e73df; }
+        .card-tasks { color: #1cc88a; }
+        .card-clients { color: #36b9cc; }
+        .card-services { color: #f6c23e; }
+        .card-invoices { color: #e74a3b; }
+        .card-payments { color: #858796; }
+
+        .card-footer {
+            background-color: transparent;
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .text-muted {
+            color: #858796 !important;
+        }
+
+        .small {
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="dashboard-title">
+            <i class="fas fa-chart-line me-2"></i>
+            Tableau de Bord
+        </h1>
+
+        <div class="row">
+            <!-- Projets -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card p-4 text-center" onclick="window.location.href='/projects'">
+                    <i class="fas fa-project-diagram stats-icon card-projects"></i>
+                    <h3 class="stats-title">PROJETS</h3>
+                    <div class="stats-value" th:text="${projectStats?.total ?: '0'}">0</div>
+                    <div class="card-footer">
+                        <span class="text-muted small">
+                            <span th:text="${projectStats?.active ?: '0'} + ' actifs'">0 actifs</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tâches -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card p-4 text-center" onclick="window.location.href='/tasks'">
+                    <i class="fas fa-tasks stats-icon card-tasks"></i>
+                    <h3 class="stats-title">TÂCHES</h3>
+                    <div class="stats-value" th:text="${taskStats?.total ?: '0'}">0</div>
+                    <div class="card-footer">
+                        <span class="text-muted small">
+                            <span th:text="${taskStats?.done ?: '0'} + ' terminées'">0 terminées</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clients -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card p-4 text-center" onclick="window.location.href='/clients'">
+                    <i class="fas fa-users stats-icon card-clients"></i>
+                    <h3 class="stats-title">CLIENTS</h3>
+                    <div class="stats-value" th:text="${clientStats?.total ?: '0'}">0</div>
+                    <div class="card-footer">
+                        <span class="text-muted small">
+                            <span th:text="${clientStats?.active ?: '0'} + ' actifs'">0 actifs</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Offres -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card p-4 text-center" onclick="window.location.href='/offers'">
+                    <i class="fas fa-handshake stats-icon card-services"></i>
+                    <h3 class="stats-title">OFFRES</h3>
+                    <div class="stats-value" th:text="${offerStats?.total ?: '0'}">0</div>
+                    <div class="card-footer">
+                        <span class="text-muted small">
+                            <span th:text="${offerStats?.pending ?: '0'} + ' en attente'">0 en attente</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Factures -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card p-4 text-center" onclick="window.location.href='/invoices'">
+                    <i class="fas fa-file-invoice-dollar stats-icon card-invoices"></i>
+                    <h3 class="stats-title">FACTURES</h3>
+                    <div class="stats-value" th:text="${invoiceStats?.total ?: '0'}">0</div>
+                    <div class="card-footer">
+                        <span class="text-muted small">
+                            <span th:text="${invoiceStats?.pending ?: '0'} + ' en attente'">0 en attente</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paiements -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card p-4 text-center" onclick="window.location.href='/payments'">
+                    <i class="fas fa-credit-card stats-icon card-payments"></i>
+                    <h3 class="stats-title">PAIEMENTS</h3>
+                    <div class="stats-value" th:text="${paymentStats?.total ?: '0'}">0</div>
+                    <div class="card-footer">
+                        <span class="text-muted small">
+                            <span th:text="${paymentStats?.totalAmount ?: '0'} + ' €'">0 €</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Taux -->
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stats-card p-4 text-center" onclick="window.location.href='/taux'">
+                    <i class="fas fa-exchange-alt stats-icon" style="color: #20c997;"></i>
+                    <h3 class="stats-title">TAUX</h3>
+                    <div class="stats-value">Gérer</div>
+                    <div class="card-footer">
+                        <span class="text-muted small">
+                            Taux de change et conversions
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphiques Statistiques -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="stats-card p-4">
+                    <h3 class="stats-title text-center mb-4">STATUT DES PROJETS</h3>
+                    <div style="height: 300px;">
+                        <canvas id="projectStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stats-card p-4">
+                    <h3 class="stats-title text-center mb-4">STATUT DES OFFRES</h3>
+                    <div style="height: 300px;">
+                        <canvas id="offerStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stats-card p-4">
+                    <h3 class="stats-title text-center mb-4">CATÉGORIES DES CLIENTS</h3>
+                    <div style="height: 300px;">
+                        <canvas id="clientCategoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        const projectData = /*[[${projectStats}]]*/ {
+            total: 0,
+            active: 0,
+            completed: 0,
+            pending: 0
+        };
+
+        const offerData = /*[[${offerStats}]]*/ {
+            total: 0,
+            pending: 0,
+            accepted: 0,
+            rejected: 0,
+            expired: 0
+        };
+
+        const clientData = /*[[${clientStats}]]*/ {
+            total: 0,
+            active: 0,
+            inactive: 0
+        };
+
+        // Graphique des projets
+        new Chart(document.getElementById('projectStatusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Actifs', 'Complétés', 'En Attente'],
+                datasets: [{
+                    data: [
+                        projectData.active,
+                        projectData.completed,
+                        projectData.pending
+                    ],
+                    backgroundColor: ['#f6c23e', '#1cc88a', '#858796']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: `Total: ${projectData.total}`
+                    }
+                }
+            }
+        });
+
+        // Graphique des offres
+        new Chart(document.getElementById('offerStatusChart'), {
+            type: 'bar',
+            data: {
+                labels: ['En Attente', 'Acceptées', 'Rejetées', 'Expirées'],
+                datasets: [{
+                    label: 'Nombre d\'Offres',
+                    data: [
+                        offerData.pending,
+                        offerData.accepted,
+                        offerData.rejected,
+                        offerData.expired
+                    ],
+                    backgroundColor: ['#f6c23e', '#1cc88a', '#e74a3b', '#858796']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: `Total: ${offerData.total}`
+                    }
+                }
+            }
+        });
+
+        // Graphique des clients
+        new Chart(document.getElementById('clientCategoryChart'), {
+            type: 'line',
+            data: {
+                labels: ['Actifs', 'Inactifs'],
+                datasets: [{
+                    label: 'Nombre de Clients',
+                    data: [
+                        clientData.active,
+                        clientData.inactive
+                    ],
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: `Total: ${clientData.total}`
+                    }
+                }
+            }
+        });
+    </script>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

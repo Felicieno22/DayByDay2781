@@ -46,4 +46,25 @@ class Payment extends Model
     {
         return $this->belongsTo(Invoice::class);
     }
+
+    /**
+     * Check if payment amount is greater than remaining amount
+     *
+     * @return bool
+     */
+    public function isAmountGreaterThanRemaining()
+    {
+        $remainingAmount = $this->invoice->total - $this->invoice->payments->where('id', '!=', $this->id)->sum('amount');
+        return $this->amount > $remainingAmount;
+    }
+
+    /**
+     * Get the remaining amount after this payment
+     *
+     * @return float
+     */
+    public function getRemainingAmount()
+    {
+        return $this->invoice->total - $this->invoice->payments->sum('amount');
+    }
 }

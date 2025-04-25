@@ -132,6 +132,19 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/first-steps', 'SettingsController@updateFirstStep')->name('settings.update.first_step');
         Route::get('/business-hours', 'SettingsController@businessHours')->name('settings.business_hours');
         Route::get('/date-formats', 'SettingsController@dateFormats')->name('settings.date_formats');
+        
+        // Routes pour la réinitialisation des données
+        Route::get('/reset-data', 'Auth\ResetDataController@index')->name('resetData.index');
+        Route::post('/reset-data', 'Auth\ResetDataController@reset')->name('reset.database')->middleware('user.is.admin');
+    });
+
+    /**
+     * Data Import
+     */
+    Route::group(['prefix' => 'dataImport', 'middleware' => ['auth', 'user.is.admin']], function () {
+        Route::get('/', 'DataImportController@index')->name('dataImport.index');
+        Route::post('/analyze', 'DataImportController@analyze')->name('dataImport.analyze');
+        Route::post('/import', 'DataImportController@import')->name('dataImport.import');
     });
 
     /**
@@ -227,6 +240,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::post('/', 'AbsenceController@store')->name('absence.store');
         Route::delete('/{absence}', 'AbsenceController@destroy')->name('absence.destroy');
     });
+
 });
 
 Route::group(['middleware' => ['auth']], function () {

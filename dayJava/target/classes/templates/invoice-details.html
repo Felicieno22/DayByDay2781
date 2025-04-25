@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Factures - DayJava</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem;
+        }
+        .page-title {
+            color: #4e73df;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            padding: 2rem 0;
+            text-align: center;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+        .back-button {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background-color: #4e73df;
+            color: white;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            background-color: #2e59d9;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 2rem;
+            border: none;
+        }
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            border-radius: 15px 15px 0 0;
+        }
+        .card-header h5 {
+            margin: 0;
+            color: #4e73df;
+            font-weight: 600;
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table th {
+            border-top: none;
+            color: #858796;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .table td {
+            vertical-align: middle;
+        }
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+        .badge-paid { background-color: #1cc88a; color: white; }
+        .badge-pending { background-color: #f6c23e; color: white; }
+        .badge-overdue { background-color: #e74a3b; color: white; }
+        .amount {
+            font-weight: bold;
+            color: #4e73df;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.location.href='/dashboard'">
+        <i class="fas fa-arrow-left me-2"></i>Retour
+    </button>
+
+    <div class="container">
+        <h1 class="page-title">
+            <i class="fas fa-file-invoice me-2"></i>
+            Liste des Factures
+        </h1>
+
+        <!-- Statistiques -->
+        <div class="row mb-4" th:if="${invoiceStats != null}">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="text-primary">Total Factures</h6>
+                        <h2 th:text="${invoiceStats.total}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="text-success">Montant Total</h6>
+                        <h2 th:text="${#numbers.formatDecimal(invoiceStats.totalAmount, 0, 'COMMA', 2, 'POINT') + ' €'}">0.00 €</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="text-warning">En Attente</h6>
+                        <h2 th:text="${invoiceStats.pending}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="text-danger">En Retard</h6>
+                        <h2 th:text="${invoiceStats.overdue}">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Factures</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Numéro</th>
+                                <th>ID Client</th>
+                                <th>Montant</th>
+                                <th>Date d'émission</th>
+                                <th>Date d'échéance</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${invoices == null || invoices.empty}">
+                                <td colspan="6" class="text-center">
+                                    <p class="text-muted my-5">Aucune facture disponible</p>
+                                </td>
+                            </tr>
+                            <tr th:each="invoice : ${invoices}" th:if="${invoices != null && !invoices.empty}">
+                                <td th:text="${invoice.number}">FAC-2024-001</td>
+                                <td th:text="${invoice.clientId}">1</td>
+                                <td class="amount" th:text="${#numbers.formatDecimal(invoice.amount, 0, 'COMMA', 2, 'POINT') + ' €'}">0.00 €</td>
+                                <td th:text="${#dates.format(invoice.issueDate, 'dd/MM/yyyy')}">01/01/2024</td>
+                                <td th:text="${#dates.format(invoice.dueDate, 'dd/MM/yyyy')}">31/01/2024</td>
+                                <td>
+                                    <span class="badge" th:classappend="${
+                                        invoice.status == 'PAID' ? 'badge-paid' :
+                                        invoice.status == 'PENDING' ? 'badge-pending' :
+                                        'badge-overdue'
+                                    }" th:text="${invoice.status}">
+                                        PENDING
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
