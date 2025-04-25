@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Api\v1\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,8 +14,13 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::group(['namespace' => 'App\Api\v1\Controllers'], function () {
-    Route::group(['middleware' => 'auth:api'], function () {
-        Route::get('users', ['uses' => 'UserController@index']);
+Route::prefix('v1')->group(function () {
+    // Routes publiques
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/test', [AuthController::class, 'test']);
+
+    // Routes protégées
+    Route::middleware('auth:api')->group(function () {
+        Route::get('/users', 'App\Api\v1\Controllers\UserController@index');
     });
 });

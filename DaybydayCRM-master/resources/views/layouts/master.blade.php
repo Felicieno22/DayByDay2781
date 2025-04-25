@@ -172,6 +172,14 @@
                                 class="bullet-point"><span></span></i> {{ __('Integrations') }}</a>
                 </div>
             @endif
+            <a href="#tools" class=" list-group-item" data-toggle="collapse" data-parent="#MainMenu"><i
+                        class="fa fa-wrench sidebar-icon"></i><span id="menu-txt">{{ __('Tools') }}</span>
+                <i class="icon ion-md-arrow-dropup arrow-side sidebar-arrow"></i></a>
+            <div class="collapse" id="tools">
+                <a href="{{ url('/csv') }}" class="list-group-item childlist">
+                    <i class="bullet-point"><span></span></i> {{ __('Import CSV') }}
+                </a>
+            </div>
         </div>
     </nav>
 

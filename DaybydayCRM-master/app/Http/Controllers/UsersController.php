@@ -184,7 +184,7 @@ class UsersController extends Controller
             $file =  $request->file('image_path');
 
             $filename = str_random(8) . '_' . $file->getClientOriginalName() ;
-            $path = Storage::put($settings->external_id, $file);
+            $path = Storage::disk('public')->put('', $file);
         }
 
 
@@ -255,12 +255,11 @@ class UsersController extends Controller
 
 
         if ($request->hasFile('image_path')) {
-            $companyname = Setting::first()->external_id;
             $file =  $request->file('image_path');
 
             $filename = str_random(8) . '_' . $file->getClientOriginalName() ;
 
-            $path = Storage::put($companyname, $file);
+            $path = Storage::disk('public')->put('', $file);
             if ($request->password == "") {
                 $input =  array_replace($request->except('password'), ['image_path'=>"$path"]);
             } else {

@@ -1,0 +1,4 @@
+name,email,primary_number,secondary_number,address,company_name,vat,industry,company_type
+John Doe,john.doe@example.com,+1234567890,+0987654321,123 Main St,Acme Corp,12345,Technology,LLC
+Jane Smith,jane.smith@example.com,+2345678901,+1098765432,456 Oak Ave,Tech Solutions,67890,Software,Inc
+Bob Johnson,bob.johnson@example.com,+3456789012,+2109876543,789 Pine Rd,Digital Services,34567,IT Services,Ltd
