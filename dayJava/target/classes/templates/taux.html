@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Taux</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1>Gestion des Taux</h1>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="/dashboard" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i> Retour au Dashboard
+                </a>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Ajouter un taux</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="tauxForm">
+                            <!-- Champ ID visible -->
+                            <div class="mb-3">
+                                <label for="id" class="form-label">ID</label>
+                                <input type="number" class="form-control" id="id" value="" placeholder="Laissez vide pour un nouveau taux">
+                                <small class="form-text text-muted">Pour les nouveaux taux, laissez ce champ vide. L'ID sera généré automatiquement.</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="taux" class="form-label">Taux (%)</label>
+                                <input type="number" step="0.01" class="form-control" id="taux" required>
+                                <small class="form-text text-muted">Exemple : 2.5 pour 2,5%</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="date_debut" class="form-label">Date de début</label>
+                                <input type="date" class="form-control" id="date_debut" required>
+                            </div>
+                            <button type="button" class="btn btn-success" onclick="saveTaux()">Enregistrer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Taux existants</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Taux</th>
+                                    <th>Date de début</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tauxTableBody">
+                                <tr>
+                                    <td colspan="4" class="text-center">Chargement...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // URL des endpoints du contrôleur Spring Boot
+        const API_TAUX_URL = "/taux/api";
+        
+        // Obtenir le token d'authentification de la session
+        function getAuthToken() {
+            // Cette fonction est un espace réservé pour l'obtention du token d'authentification
+            // Dans un environnement réel, vous pourriez le récupérer d'un cookie, du stockage local, etc.
+            // Pour l'instant, nous supposons qu'il est stocké dans la session côté serveur
+            return null; // Spring Boot gèrera l'ajout du token côté serveur
+        }
+        
+        // Configurer les headers communs pour toutes les requêtes AJAX
+        $.ajaxSetup({
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('Accept', 'application/json');
+                const token = getAuthToken();
+                if (token) {
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                }
+            }
+        });
+        
+        // Formater une date pour l'affichage
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        }
+        
+        // Charger les taux
+        $(document).ready(function() {
+            loadTaux();
+        });
+
+        function loadTaux() {
+            $.ajax({
+                url: API_TAUX_URL,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    console.log('Données reçues:', data);
+                    
+                    // Déterminer le format des données
+                    let tauxData = data;
+                    
+                    // Si les données sont au format {data: [...]}
+                    if (data && typeof data === 'object' && data.data && Array.isArray(data.data)) {
+                        console.log('Format détecté: objet avec propriété data');
+                        tauxData = data.data;
+                    }
+                    // Si les données ne sont pas un tableau
+                    else if (data && !Array.isArray(data)) {
+                        console.log('Format détecté: objet sans tableau');
+                        // Convertir en tableau d'un élément
+                        tauxData = [data];
+                    }
+                    // Sinon, supposer que c'est déjà un tableau
+                    else {
+                        console.log('Format détecté: tableau');
+                    }
+                    
+                    // Vérifier qu'on a bien un tableau
+                    if (!Array.isArray(tauxData)) {
+                        console.error('Format inattendu:', tauxData);
+                        tauxData = [];
+                    }
+                    
+                    updateTauxTable(tauxData);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erreur:', error);
+                    console.error('Status code:', xhr.status);
+                    console.error('Réponse:', xhr.responseText);
+                    
+                    // Tentative de récupération des données brutes
+                    try {
+                        if (xhr.responseText) {
+                            const rawData = JSON.parse(xhr.responseText);
+                            console.log('Tentative de récupération des données brutes:', rawData);
+                            
+                            let tauxData = rawData;
+                            
+                            // Si les données sont au format {data: [...]}
+                            if (rawData && typeof rawData === 'object' && rawData.data && Array.isArray(rawData.data)) {
+                                tauxData = rawData.data;
+                                console.log('Données récupérées depuis la propriété data:', tauxData);
+                                if (tauxData.length > 0) {
+                                    updateTauxTable(tauxData);
+                                    return;
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Erreur lors de la récupération des données brutes:', e);
+                    }
+                    
+                    $('#tauxTableBody').html('<tr><td colspan="4" class="text-center">Erreur de chargement</td></tr>');
+                }
+            });
+        }
+        
+        // Mettre à jour le tableau
+        function updateTauxTable(data) {
+            const tableBody = $('#tauxTableBody');
+            
+            if (!data || data.length === 0) {
+                tableBody.html('<tr><td colspan="3" class="text-center">Aucun taux trouvé</td></tr>');
+                return;
+            }
+            
+            tableBody.empty();
+            
+            $.each(data, function(index, item) {
+                console.log('Item taux:', item);
+                
+                const row = $('<tr>');
+                row.html(`
+                    <td>${item.id || ''}</td>
+                    <td>${(item.taux < 1 ? (item.taux * 100).toFixed(2) : item.taux) || 0}%</td>
+                    <td>${formatDate(item.date_debut) || ''}</td>
+                `);
+                tableBody.append(row);
+            });
+        }
+        
+        // Charger un taux pour édition
+        function editTaux(id) {
+            if (!id) return;
+            
+            $.ajax({
+                url: API_TAUX_URL + '/' + id,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    // Récupérer les données du taux
+                    const taux = data;
+                    
+                    // Remplir le formulaire
+                    $('#id').val(taux.id || '');
+                    
+                    // Convertir le taux décimal en pourcentage pour l'affichage
+                    if (taux.taux !== null && taux.taux !== undefined) {
+                        // Si c'est un petit nombre (ex: 0.025), on le multiplie par 100
+                        const tauxValue = parseFloat(taux.taux);
+                        $('#taux').val(tauxValue < 1 ? (tauxValue * 100).toFixed(2) : tauxValue);
+                    } else {
+                        $('#taux').val('');
+                    }
+                    
+                    $('#date_debut').val(taux.date_debut ? taux.date_debut.split('T')[0] : '');
+                    
+                    // Faire défiler jusqu'au formulaire
+                    $('#tauxForm')[0].scrollIntoView({ behavior: 'smooth' });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erreur:', error);
+                    console.error('Status code:', xhr.status);
+                    console.error('Réponse:', xhr.responseText);
+                    alert('Erreur lors du chargement du taux pour édition.');
+                }
+            });
+        }
+        
+        // Sauvegarder un taux
+        function saveTaux() {
+            const tauxId = $('#id').val();
+            let tauxValue = $('#taux').val();
+            const dateDebut = $('#date_debut').val();
+            
+            if (!tauxValue || !dateDebut) {
+                alert('Veuillez remplir les champs obligatoires');
+                return;
+            }
+            
+            // Convertir le pourcentage en décimal si nécessaire
+            tauxValue = parseFloat(tauxValue);
+            if (tauxValue > 1) {
+                tauxValue = tauxValue / 100;
+            }
+            
+            // Création de l'objet selon le format attendu
+            const tauxObj = {
+                taux: tauxValue,
+                date_debut: dateDebut
+            };
+            
+            // Si un ID est spécifié, valide et différent de 0, l'inclure dans l'objet
+            if (tauxId && tauxId.trim() !== '' && tauxId !== '0' && parseInt(tauxId) > 0) {
+                tauxObj.id = parseInt(tauxId);
+            }
+            
+            console.log('Envoi des données:', tauxObj);
+            
+            // Déterminer si c'est une création ou mise à jour
+            let url = API_TAUX_URL;
+            let method = 'POST';
+            
+            // Si ID est spécifié, valide et différent de 0, c'est une mise à jour
+            if (tauxId && tauxId.trim() !== '' && tauxId !== '0' && parseInt(tauxId) > 0) {
+                method = 'POST'; // Toujours utiliser POST, le contrôleur gèrera la mise à jour en fonction de l'ID
+            }
+            
+            // Récupérer le token CSRF s'il existe
+            const headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            };
+            
+            const csrfToken = $('meta[name="_csrf"]').attr('content');
+            const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
+            
+            $.ajax({
+                url: url,
+                type: method,
+                headers: headers,
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(tauxObj),
+                success: function(data) {
+                    console.log('Réponse API:', data);
+                    $('#tauxForm')[0].reset();
+                    $('#id').val(''); // Réinitialiser explicitement l'ID
+                    loadTaux(); // Recharger les taux après création/modification
+                    alert('Taux ' + (tauxId ? 'modifié' : 'ajouté') + ' avec succès');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erreur:', error);
+                    console.error('Status code:', xhr.status);
+                    console.error('Détails:', xhr.responseText);
+                    
+                    // Essayer de parser la réponse pour obtenir un message d'erreur
+                    let errorMessage = 'Erreur lors de l\'opération.';
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.errors) {
+                            errorMessage = 'Erreur: ';
+                            // Parcourir tous les messages d'erreur
+                            for (const key in response.errors) {
+                                if (typeof response.errors[key] === 'object') {
+                                    errorMessage += Object.values(response.errors[key]).join(', ');
+                                } else {
+                                    errorMessage += response.errors[key];
+                                }
+                            }
+                        } else if (response.message) {
+                            errorMessage = 'Erreur: ' + response.message;
+                        }
+                    } catch (e) {
+                        // Si on ne peut pas parser la réponse
+                        if (xhr.status === 500) {
+                            errorMessage = 'Erreur serveur: Vérifiez l\'ID et les autres champs.';
+                        } else if (xhr.status === 404) {
+                            errorMessage = 'API non trouvée: Vérifiez l\'URL.';
+                        } else if (xhr.status === 0) {
+                            errorMessage = 'Impossible de contacter le serveur API. Vérifiez que le serveur est en marche.';
+                        }
+                    }
+                    
+                    alert(errorMessage + ' Voir la console pour plus de détails.');
+                    
+                    // Malgré l'erreur, l'insertion a peut-être réussi, donc recharger la liste après un court délai
+                    setTimeout(function() {
+                        loadTaux();
+                        $('#tauxForm')[0].reset(); // Réinitialiser le formulaire
+                        $('#id').val(''); // Réinitialiser explicitement l'ID
+                    }, 1000);
+                }
+            });
+        }
+        
+        // Supprimer un taux
+        function deleteTaux(id) {
+            if (!id) {
+                console.error('ID invalide pour la suppression:', id);
+                alert('Erreur: ID invalide');
+                return;
+            }
+            
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce taux?')) {
+                $.ajax({
+                    url: API_TAUX_URL + '/' + id,
+                    type: 'DELETE',
+                    success: function() {
+                        loadTaux(); // Recharger les taux après suppression
+                        alert('Taux supprimé avec succès');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erreur:', error);
+                        console.error('Status code:', xhr.status);
+                        console.error('Détails:', xhr.responseText);
+                        alert('Erreur lors de la suppression du taux. Voir la console pour plus de détails.');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html> 

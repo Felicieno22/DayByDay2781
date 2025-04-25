@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Projets</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Liste des Projets</h2>
+            <a href="/dashboard" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Projets</h5>
+                        <p class="card-text h2" th:text="${projectStats.total}">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Projets Actifs</h5>
+                        <p class="card-text h2" th:text="${projectStats.active}">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Projets Terminés</h5>
+                        <p class="card-text h2" th:text="${projectStats.completed}">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Projets en Attente</h5>
+                        <p class="card-text h2" th:text="${projectStats.pending}">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des projets -->
+        <div class="card">
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(projects)}" class="alert alert-info">
+                    Aucun projet disponible.
+                </div>
+                <div th:if="${not #lists.isEmpty(projects)}" class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Description</th>
+                                <th>Client</th>
+                                <th>Date de début</th>
+                                <th>Date de fin</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="project : ${projects}">
+                                <td th:text="${project.name}">Nom du projet</td>
+                                <td th:text="${project.description}">Description</td>
+                                <td th:text="${project.clientId}">ID Client</td>
+                                <td th:text="${#temporals.format(project.startDate, 'dd/MM/yyyy')}">Date de début</td>
+                                <td th:text="${#temporals.format(project.endDate, 'dd/MM/yyyy')}">Date de fin</td>
+                                <td>
+                                    <span th:class="${'badge ' + 
+                                        (project.status == 'active' ? 'bg-success' : 
+                                        (project.status == 'completed' ? 'bg-info' : 
+                                        (project.status == 'pending' ? 'bg-warning' : 'bg-secondary')))}"
+                                        th:text="${project.status}">
+                                        Statut
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
